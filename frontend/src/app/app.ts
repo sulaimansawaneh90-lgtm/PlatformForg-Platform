@@ -8,3 +8,5 @@ export class App {
     version: '1.0.0',
   };
 }
+
+// PF-027 affected CI validation
