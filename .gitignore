@@ -45,3 +45,10 @@ Thumbs.db
 .claude/settings.local.json
 
 .angular
+
+# Python generated files
+services/inventory/.coverage
+services/inventory/**/__pycache__/
+
+# Generated reports
+reports/
