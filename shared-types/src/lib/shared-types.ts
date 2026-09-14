@@ -6,3 +6,5 @@ export interface PlatformConfig {
 export function sharedTypes(): string {
   return 'shared-types';
 }
+
+// PF-017 dependency change test
