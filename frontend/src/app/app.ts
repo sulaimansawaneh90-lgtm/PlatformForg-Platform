@@ -1,15 +1,10 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import { PlatformConfig } from '@platformforge-platform/shared-types';
 
-@Component({
-  imports: [NxWelcome, RouterModule],
-  selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css',
-})
 export class App {
   protected title = 'frontend';
-}
 
-// PlatformForge PF-015 affected-build test
+  protected config: PlatformConfig = {
+    environment: 'development',
+    version: '1.0.0',
+  };
+}
