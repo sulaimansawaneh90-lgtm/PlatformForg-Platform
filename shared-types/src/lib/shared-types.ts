@@ -3,6 +3,10 @@ export interface PlatformConfig {
   version: string;
 }
 
+export interface PlatformMetadata {
+  name: string;
+}
+
 export function sharedTypes(): string {
   return 'shared-types';
 }
