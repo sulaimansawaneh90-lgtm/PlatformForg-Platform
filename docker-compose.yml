@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: platformforge-backend:latest
+    container_name: platformforge-backend
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    image: platformforge-frontend:latest
+    container_name: platformforge-frontend
+    ports:
+      - "8080:80"
+
+  inventory:
+    image: platformforge-inventory:latest
+    container_name: platformforge-inventory
