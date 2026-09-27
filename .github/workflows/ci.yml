@@ -12,8 +12,35 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Lint, Test & Build
+  prepare:
+    name: Prepare CI
+    runs-on: ubuntu-latest
+
+    outputs:
+      base: ${{ steps.nx-base.outputs.base }}
+      head: ${{ steps.nx-base.outputs.head }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Nx comparison range
+        id: nx-base
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "base=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  lint:
+    name: Lint Affected Projects
+    needs: prepare
     runs-on: ubuntu-latest
 
     steps:
@@ -36,11 +63,61 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Quality Gate - Lint affected projects
-        run: pnpm nx affected -t lint --base=origin/master --head=HEAD
+      - name: Lint affected projects
+        run: pnpm nx affected -t lint --base=${{ needs.prepare.outputs.base }} --head=${{ needs.prepare.outputs.head }}
 
-      - name: Quality Gate - Test affected projects
-        run: pnpm nx affected -t test --base=origin/master --head=HEAD
+  test:
+    name: Test Affected Projects
+    needs: prepare
+    runs-on: ubuntu-latest
 
-      - name: Quality Gate - Build affected projects
-        run: pnpm nx affected -t build --base=origin/master --head=HEAD
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test affected projects
+        run: pnpm nx affected -t test --base=${{ needs.prepare.outputs.base }} --head=${{ needs.prepare.outputs.head }}
+
+  build:
+    name: Build Affected Projects
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build affected projects
+        run: pnpm nx affected -t build --base=${{ needs.prepare.outputs.base }} --head=${{ needs.prepare.outputs.head }}
